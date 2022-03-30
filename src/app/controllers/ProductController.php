@@ -55,8 +55,5 @@ class ProductController extends Controller
         header('location:http://localhost:8080/product');
     }
 
-    public function productlistAction()
-    {
-        echo "product listing";
-    }
+    
 }

@@ -63,6 +63,10 @@ $eventManager->attach(
     'notifications',
     new App\Listeners\notificationListeners()
 );
+$eventManager->attach(
+    'application:beforeHandleRequest',
+    new App\Listeners\notificationListeners()
+);
 
 $container->set(
     'eventManager',
@@ -70,6 +74,7 @@ $container->set(
 );
 
 $application = new Application($container);
+$application->setEventsManager($eventManager);
 
 
 
