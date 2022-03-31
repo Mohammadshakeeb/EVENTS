@@ -15,29 +15,71 @@ class AclController extends Controller
 
     public function buildAction()
     {
+        //     $data = $this->request->getpost();
+        //     echo "<pre>";
+        //     print_r($data);
+        //     echo "</pre>";
+
+        //     $c = count($_POST);
+        //     // echo $data['role'];
+        //    $action= array_slice($_POST, 2, $c - 3);
+        //     // print_r($action);
+        //     // die;
+        $data = Permissions::find();
+        // print_r(json_decode($data[3]->action));
+        // die;
 
 
         $aclfile = APP_PATH . '/security/acl.cache';
         if (true !== is_File($aclfile)) {
 
             $acl = new Memory();
-            $acl->addRole('Admin');
-            $acl->addRole('Customer');
-            $acl->addRole('Guest');
+            // $acl->addRole($data['role']);
+            // $acl->addRole('Customer');
+            // $acl->addRole('Guest');
+
+            foreach ($data as $k => $v) {
+
+                $acl->addRole($v->role);
+                $acl->addComponent($v->controller, json_decode($v->action));
+                $acl->allow($v->role, $v->controller, json_decode($v->action));
+            }
+
             $acl->addComponent(
-                'order',
+                'acl',
                 [
-                    'add',
-                    'addhelper',
-                    'index'
+                    'build',
+                    'addrole',
+                    'getrole',
+                    'addmethod',
+                    'getcomponent',
+                    'addcomponent',
+                    'getmethod',
+                    'addmethod',
+                    'permission'
                 ]
             );
+            // $acl->addComponent(
+            //     $data['controller'],
+            //     $action
+            // );
 
-            $acl->allow('Admin', 'order', 'add');
+            // $acl->allow($data['role'], $data['controller'], $action);
+            $acl->allow('*', 'acl', [
+                'build',
+                'addrole',
+                'getrole',
+                'addmethod',
+                'getcomponent',
+                'addcomponent',
+                'getmethod',
+                'addmethod',
+                'permission'
+            ]);
 
             //  $acl->deny('Guest', 'order', '*');
-            $acl->allow('Guest', 'order', 'add');
-            $acl->allow('Admin');
+            // $acl->allow('Guest', 'order', 'add');
+            // $acl->allow('Admin');
 
             file_put_contents(
                 $aclfile,
@@ -48,11 +90,14 @@ class AclController extends Controller
                 file_get_contents($aclfile)
             );
         }
+        echo "hii";
+        die;
     }
 
-    public function getroleAction(){
+    public function getroleAction()
+    {
 
-     echo   '<h1>FORM TO ADD NEW ROLES</h1>
+        echo   '<h1>FORM TO ADD NEW ROLES</h1>
         <br><br>
         <form method="POST" action="addrole">
     <label for="role"><b>ROLE<b></label>
@@ -61,33 +106,108 @@ class AclController extends Controller
     <input type="submit" name="submit" value="SUBMIT">';
     }
 
-    public function addroleAction(){
+    public function addroleAction()
+    {
         echo "<pre>";
         print_r($_POST);
         echo "</pre>";
-        $data=new Roles();
-        $data->role=$_POST['role'];
+        $data = new Roles();
+        $data->role = $_POST['role'];
         $data->save();
+        echo '<a href="http://localhost:8080/acl/getcomponent">ADD A NEW COMPONENT</a>';
     }
 
-    public function getcontrollerAction(){
+    public function getcomponentAction()
+    {
 
         echo   '<h1>FORM TO ADD NEW COMPONENTS</h1>
         <br><br>
-        <form method="POST" action="addrole">
+        <form method="POST" action="addcomponent">
     <label for="role"><b>COMPONENT<b></label>
     <input type="text" name="controller" id="controller"></form>
     <br><br>
     <input type="submit" name="submit" value="SUBMIT">';
-
     }
 
-    public function addcomponentAction(){
+    public function addcomponentAction()
+    {
         echo "<pre>";
         print_r($_POST);
         echo "</pre>";
-        $data=new Roles();
-        $data->role=$_POST['controller'];
+        $data = new Components();
+        $data->controller = $_POST['controller'];
         $data->save();
+        echo '<a href="http://localhost:8080/acl/getmethod">ADD A NEW ACTION</a>';
+    }
+
+    public function getmethodAction()
+    {
+    }
+
+    public function addmethodAction()
+    {
+        echo "<pre>";
+        print_r($_POST);
+        echo "</pre>";
+        $data = new Actions();
+        $data->method = $_POST['action'];
+        $data->controller_id = $_POST['product'];
+        $data->save();
+        echo '<a href="http://localhost:8080/acl/permission">SET PERMISSION</a>';
+    }
+
+
+    public function permissionAction()
+    {
+    }
+    public function addpermissionAction()
+    {
+        $data = $this->request->getpost();
+        echo "<pre>";
+        print_r($data);
+        echo "</pre>";
+
+        $c = count($_POST);
+        // echo $data['role'];
+        $action = array_slice($_POST, 2, $c - 3);
+        // print_r($action);
+        // die;
+        $actionn = array();
+        foreach ($action as $k => $v) {
+            array_push($actionn, $v);
+        }
+        $fill = new Permissions();
+        $actionn = json_encode($actionn);
+        // $str=str_replace("{", "", $actionn);
+        // $str1=str_replace("}", "", $str);
+        // $arr=json_encode($str1);
+        // $s=json_decode($arr, true);
+        // echo $s[0];
+        // die;
+        // for($i=0;$i<count($arr);$i++){
+        //     echo $arr[$i];
+        // }
+        // print_r($arr);
+
+        $dat = array(
+            'role' => $data['role'],
+            'controller' => $data['controller'],
+            'action' => $actionn
+        );
+        $fill->assign(
+            $dat,
+            [
+                'role',
+                'controller',
+                'action'
+            ]
+        );
+        // $fill->role=$data['role'];
+        // $fill->controller=$data['controller'];
+        // $fill->action=json_encode($action);
+        $fill->save();
+        die;
+
+        header('location:http://localhost:8080/acl/build');
     }
 }

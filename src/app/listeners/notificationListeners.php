@@ -35,26 +35,27 @@ class notificationListeners
         return $values;
     }
 
-    // public function beforeHandleRequest(Event $event, \Phalcon\Mvc\Application $application)
-    // {
-       
-        
-    //     $aclfile = APP_PATH . '/security/acl.cache';
-    //     if (is_file($aclfile) == true) {
-       
-    //         $acl = unserialize(
-    //             file_get_contents($aclfile)
-    //         );
-    //         $role = $application->request->get('role');
-           
-    //         if (!$role || true !== $acl->isAllowed($role, 'order', 'add')) {
-    //             echo "access denied";
-    //             die();
-    //         }
-    //     } else {
+    public function beforeHandleRequest(Event $event, \Phalcon\Mvc\Application $application)
+    {
 
-    //         echo "No ACL";
-    //         die();
-    //     }
-    // }
+
+        $aclfile = APP_PATH . '/security/acl.cache';
+        if (is_file($aclfile) == true) {
+
+            $acl = unserialize(
+                file_get_contents($aclfile)
+            );
+            $role = $application->request->get('role');
+            $controller = $application->router->getControllerName();
+            $action = $application->router->getActionName();
+            if (!$role || true !== $acl->isAllowed($role, $controller, $action)) {
+                echo "access denied";
+                die();
+            }
+        } else {
+
+            echo "No ACL";
+            die();
+        }
+    }
 }

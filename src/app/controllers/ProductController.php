@@ -28,17 +28,17 @@ class ProductController extends Controller
         $value = $_POST;
         $eventmanager = $this->di->get('eventManager');
         $settings = Settings::find();
-        $array= $eventmanager->fire('notifications:beforeSend', (object)$value, $settings);
+        $array = $eventmanager->fire('notifications:beforeSend', (object)$value, $settings);
         // echo "<pre>";
         // print_r($values);
         // echo "</pre>";
         // die();
-        $val=array(
-            'name'=>$array->name,
-            'description'=>$array->description,
-            'price'=>$array->price,
-            'tags'=>$array->tags,
-            'stock'=>$array->stock
+        $val = array(
+            'name' => $array->name,
+            'description' => $array->description,
+            'price' => $array->price,
+            'tags' => $array->tags,
+            'stock' => $array->stock
         );
         $data->assign(
             $val,
